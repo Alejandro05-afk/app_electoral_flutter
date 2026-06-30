@@ -1,11 +1,56 @@
 import 'package:drift/drift.dart';
 import 'package:control_electoral/features/veedor/local/database.dart';
 import 'package:control_electoral/features/veedor/domain/entities/acta_entity.dart';
+import 'package:control_electoral/features/veedor/domain/entities/mesa_entity.dart';
+import 'package:control_electoral/features/veedor/domain/entities/organizacion_entity.dart';
 
 class ActaLocalDatasource {
   final AppDatabase _db;
 
   ActaLocalDatasource(this._db);
+
+  ActaEntity _rowToActa(LocalActa row, List<VotoEntity> votos) {
+    return ActaEntity(
+      id: row.id,
+      mesaId: row.mesaId,
+      recintoId: row.recintoId,
+      dignidad: row.dignidad,
+      totalSufragantesLetras: row.totalSufragantesLetras,
+      totalSufragantesCentena: row.totalSufragantesCentena,
+      totalSufragantesDecena: row.totalSufragantesDecena,
+      totalSufragantesUnidad: row.totalSufragantesUnidad,
+      votosBlancosLetras: row.votosBlancosLetras,
+      votosBlancosCentena: row.votosBlancosCentena,
+      votosBlancosDecena: row.votosBlancosDecena,
+      votosBlancosUnidad: row.votosBlancosUnidad,
+      votosNulosLetras: row.votosNulosLetras,
+      votosNulosCentena: row.votosNulosCentena,
+      votosNulosDecena: row.votosNulosDecena,
+      votosNulosUnidad: row.votosNulosUnidad,
+      fotoLocalPath: row.fotoLocalPath,
+      fotoFileId: row.fotoFileId,
+      gpsLat: row.gpsLat,
+      gpsLng: row.gpsLng,
+      gpsAccuracy: row.gpsAccuracy,
+      registradoPor: row.registradoPor,
+      sincronizado: row.sincronizado,
+      updatedAt: row.updatedAt,
+      votos: votos,
+    );
+  }
+
+  VotoEntity _rowToVoto(LocalActaVoto row) {
+    return VotoEntity(
+      id: row.id,
+      actaId: row.actaId,
+      organizacionId: row.organizacionId,
+      votos: row.votos,
+      votosLetras: row.votosLetras,
+      votosCentena: row.votosCentena,
+      votosDecena: row.votosDecena,
+      votosUnidad: row.votosUnidad,
+    );
+  }
 
   Future<void> saveActa(ActaEntity acta) async {
     await _db.into(_db.localActas).insertOnConflictUpdate(
@@ -14,9 +59,18 @@ class ActaLocalDatasource {
         mesaId: acta.mesaId,
         recintoId: acta.recintoId,
         dignidad: acta.dignidad,
-        totalSufragantes: acta.totalSufragantes,
-        votosNulos: acta.votosNulos,
-        votosBlancos: acta.votosBlancos,
+        totalSufragantesLetras: Value(acta.totalSufragantesLetras),
+        totalSufragantesCentena: Value(acta.totalSufragantesCentena),
+        totalSufragantesDecena: Value(acta.totalSufragantesDecena),
+        totalSufragantesUnidad: Value(acta.totalSufragantesUnidad),
+        votosBlancosLetras: Value(acta.votosBlancosLetras),
+        votosBlancosCentena: Value(acta.votosBlancosCentena),
+        votosBlancosDecena: Value(acta.votosBlancosDecena),
+        votosBlancosUnidad: Value(acta.votosBlancosUnidad),
+        votosNulosLetras: Value(acta.votosNulosLetras),
+        votosNulosCentena: Value(acta.votosNulosCentena),
+        votosNulosDecena: Value(acta.votosNulosDecena),
+        votosNulosUnidad: Value(acta.votosNulosUnidad),
         fotoLocalPath: Value(acta.fotoLocalPath),
         fotoFileId: Value(acta.fotoFileId),
         gpsLat: Value(acta.gpsLat),
@@ -34,46 +88,38 @@ class ActaLocalDatasource {
           id: voto.id,
           actaId: voto.actaId,
           organizacionId: voto.organizacionId,
-          votos: voto.votos,
+          votos: Value(voto.votos),
+          votosLetras: Value(voto.votosLetras),
+          votosCentena: Value(voto.votosCentena),
+          votosDecena: Value(voto.votosDecena),
+          votosUnidad: Value(voto.votosUnidad),
         ),
       );
     }
   }
 
-  Future<List<ActaEntity>> getUnsyncedActas() async {
-    final rows = await (_db.select(_db.localActas)
-        ..where((t) => t.sincronizado.equals(false)))
-        .get();
+  Future<List<ActaEntity>> _loadActasWithCondition(Function(dynamic) queryFn) async {
+    final query = _db.select(_db.localActas);
+    queryFn(query);
+    final rows = await query.get();
     final result = <ActaEntity>[];
     for (final row in rows) {
       final votos = await (_db.select(_db.localActaVotos)
           ..where((t) => t.actaId.equals(row.id)))
           .get();
-      result.add(ActaEntity(
-        id: row.id,
-        mesaId: row.mesaId,
-        recintoId: row.recintoId,
-        dignidad: row.dignidad,
-        totalSufragantes: row.totalSufragantes,
-        votosNulos: row.votosNulos,
-        votosBlancos: row.votosBlancos,
-        fotoLocalPath: row.fotoLocalPath,
-        fotoFileId: row.fotoFileId,
-        gpsLat: row.gpsLat,
-        gpsLng: row.gpsLng,
-        gpsAccuracy: row.gpsAccuracy,
-        registradoPor: row.registradoPor,
-        sincronizado: row.sincronizado,
-        updatedAt: row.updatedAt,
-        votos: votos.map((v) => VotoEntity(
-          id: v.id,
-          actaId: v.actaId,
-          organizacionId: v.organizacionId,
-          votos: v.votos,
-        )).toList(),
-      ));
+      result.add(_rowToActa(row, votos.map(_rowToVoto).toList()));
     }
     return result;
+  }
+
+  Future<List<ActaEntity>> getActasByUser(String userId) async {
+    return _loadActasWithCondition(
+        (query) => query.where((t) => t.registradoPor.equals(userId)));
+  }
+
+  Future<List<ActaEntity>> getUnsyncedActas() async {
+    return _loadActasWithCondition(
+        (query) => query.where((t) => t.sincronizado.equals(false)));
   }
 
   Future<void> markAsSynced(String actaId) async {
@@ -82,38 +128,62 @@ class ActaLocalDatasource {
   }
 
   Future<List<ActaEntity>> getActasByMesa(String mesaId) async {
-    final rows = await (_db.select(_db.localActas)
-        ..where((t) => t.mesaId.equals(mesaId)))
-        .get();
-    final result = <ActaEntity>[];
-    for (final row in rows) {
-      final votos = await (_db.select(_db.localActaVotos)
-          ..where((t) => t.actaId.equals(row.id)))
-          .get();
-      result.add(ActaEntity(
-        id: row.id,
-        mesaId: row.mesaId,
-        recintoId: row.recintoId,
-        dignidad: row.dignidad,
-        totalSufragantes: row.totalSufragantes,
-        votosNulos: row.votosNulos,
-        votosBlancos: row.votosBlancos,
-        fotoLocalPath: row.fotoLocalPath,
-        fotoFileId: row.fotoFileId,
-        gpsLat: row.gpsLat,
-        gpsLng: row.gpsLng,
-        gpsAccuracy: row.gpsAccuracy,
-        registradoPor: row.registradoPor,
-        sincronizado: row.sincronizado,
-        updatedAt: row.updatedAt,
-        votos: votos.map((v) => VotoEntity(
-          id: v.id,
-          actaId: v.actaId,
-          organizacionId: v.organizacionId,
-          votos: v.votos,
-        )).toList(),
-      ));
+    return _loadActasWithCondition(
+        (query) => query.where((t) => t.mesaId.equals(mesaId)));
+  }
+
+  Future<void> saveMesasForVeedor(List<MesaEntity> mesas, String veedorId) async {
+    await (_db.delete(_db.localMesas)..where((t) => t.veedorUserId.equals(veedorId))).go();
+    for (final mesa in mesas) {
+      await _db.into(_db.localMesas).insert(
+        LocalMesasCompanion.insert(
+          id: mesa.id,
+          recintoId: mesa.recintoId,
+          numeroMesa: mesa.numeroMesa,
+          veedorId: Value(mesa.veedorId),
+          estado: mesa.estado,
+          veedorUserId: veedorId,
+        ),
+      );
     }
-    return result;
+  }
+
+  Future<List<MesaEntity>> getCachedMesasByVeedor(String veedorId) async {
+    final rows = await (_db.select(_db.localMesas)
+        ..where((t) => t.veedorUserId.equals(veedorId)))
+        .get();
+    return rows.map((row) => MesaEntity(
+      id: row.id,
+      recintoId: row.recintoId,
+      numeroMesa: row.numeroMesa,
+      veedorId: row.veedorId,
+      estado: row.estado,
+    )).toList();
+  }
+
+  Future<void> saveOrganizaciones(List<OrganizacionEntity> orgs) async {
+    await _db.delete(_db.localOrganizaciones).go();
+    for (final org in orgs) {
+      await _db.into(_db.localOrganizaciones).insert(
+        LocalOrganizacionesCompanion.insert(
+          id: org.id,
+          nombre: org.nombre,
+          dignidad: org.dignidad,
+          numeroLista: org.numeroLista,
+          candidatoNombre: org.candidatoNombre,
+        ),
+      );
+    }
+  }
+
+  Future<List<OrganizacionEntity>> getCachedOrganizaciones() async {
+    final rows = await _db.select(_db.localOrganizaciones).get();
+    return rows.map((row) => OrganizacionEntity(
+      id: row.id,
+      nombre: row.nombre,
+      dignidad: row.dignidad,
+      numeroLista: row.numeroLista,
+      candidatoNombre: row.candidatoNombre,
+    )).toList();
   }
 }

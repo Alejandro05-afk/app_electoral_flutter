@@ -1,33 +1,86 @@
 // tools/seed_data.dart
 // Run with: dart run tools/seed_data.dart
-// NOTE: This script requires a server-side Appwrite client (use Appwrite Function or set headers manually)
+// NOTE: Requires an Appwrite API Key with databases.write permission.
+// Get one from: Appwrite Console -> API Keys -> Create API Key
 import 'package:appwrite/appwrite.dart';
 
-const endpoint = 'TU_ENDPOINT';
-const projectId = 'TU_PROJECT_ID';
-const databaseId = 'TU_DB_ID';
+const endpoint = 'https://cloud.appwrite.io/v1';
+const projectId = '6a3d90690027e626c87c';
+const databaseId = '6a3d923c0002ed8f934b';
+const apiKey = 'AQUI_TU_API_KEY'; // <-- Reemplazar con API Key del backend
 
 void main() async {
   final client = Client()
     ..setEndpoint(endpoint)
-    ..setProject(projectId);
+    ..setProject(projectId)
+    ..setKey(apiKey);
 
   final db = Databases(client);
 
   final orgsAlcalde = [
-    {'nombre': 'Movimiento A', 'candidato_nombre': 'Juan Pérez', 'dignidad': 'alcalde', 'numero_lista': 1},
-    {'nombre': 'Partido B', 'candidato_nombre': 'María López', 'dignidad': 'alcalde', 'numero_lista': 2},
-    {'nombre': 'Alianza C', 'candidato_nombre': 'Carlos Ruiz', 'dignidad': 'alcalde', 'numero_lista': 3},
-    {'nombre': 'Frente D', 'candidato_nombre': 'Ana Torres', 'dignidad': 'alcalde', 'numero_lista': 4},
-    {'nombre': 'Unión E', 'candidato_nombre': 'Luis Mora', 'dignidad': 'alcalde', 'numero_lista': 5},
+    {
+      'nombre': 'Revolución Ciudadana',
+      'candidato_nombre': 'Pabel Muñoz',
+      'dignidad': 'alcalde',
+      'numero_lista': 5,
+    },
+    {
+      'nombre': 'Partido Social Cristiano',
+      'candidato_nombre': 'Jorge Yunda',
+      'dignidad': 'alcalde',
+      'numero_lista': 6,
+    },
+    {
+      'nombre': 'Acción Democrática Nacional',
+      'candidato_nombre': 'Andrés Castillo',
+      'dignidad': 'alcalde',
+      'numero_lista': 7,
+    },
+    {
+      'nombre': 'Movimiento CREO',
+      'candidato_nombre': 'Juan José Castelló',
+      'dignidad': 'alcalde',
+      'numero_lista': 21,
+    },
+    {
+      'nombre': 'Pachakutik',
+      'candidato_nombre': 'Rosa Cerda',
+      'dignidad': 'alcalde',
+      'numero_lista': 18,
+    },
   ];
 
   final orgsPrefecto = [
-    {'nombre': 'Movimiento A', 'candidato_nombre': 'Pedro Gómez', 'dignidad': 'prefecto', 'numero_lista': 1},
-    {'nombre': 'Partido B', 'candidato_nombre': 'Lucía Vega', 'dignidad': 'prefecto', 'numero_lista': 2},
-    {'nombre': 'Alianza C', 'candidato_nombre': 'Diego Ramos', 'dignidad': 'prefecto', 'numero_lista': 3},
-    {'nombre': 'Frente D', 'candidato_nombre': 'Sofía Herrera', 'dignidad': 'prefecto', 'numero_lista': 4},
-    {'nombre': 'Unión E', 'candidato_nombre': 'Jorge Medina', 'dignidad': 'prefecto', 'numero_lista': 5},
+    {
+      'nombre': 'Revolución Ciudadana',
+      'candidato_nombre': 'Paola Pabón',
+      'dignidad': 'prefecto',
+      'numero_lista': 5,
+    },
+    {
+      'nombre': 'Partido Social Cristiano',
+      'candidato_nombre': 'Gissel Proaño',
+      'dignidad': 'prefecto',
+      'numero_lista': 6,
+    },
+    {
+      'nombre': 'Acción Democrática Nacional',
+      'candidato_nombre': 'Mauricio Pinto',
+      'dignidad': 'prefecto',
+      'numero_lista': 7,
+    },
+    {
+      'nombre': 'Movimiento CREO',
+      'candidato_nombre': 'Patricio Barriga',
+      'dignidad': 'prefecto',
+      'numero_lista': 21,
+    },
+    {
+      'nombre': 'Pachakutik',
+      'candidato_nombre': 'Fernando Davalos',
+      'dignidad': 'prefecto',
+      'numero_lista': 18,
+    },
   ];
 
   print('Insertando organizaciones políticas...');

@@ -4,14 +4,14 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.12.2
+  sdk: ^3.11.0
 
 dependencies:
   flutter:
     sdk: flutter
 
   # Backend
-  appwrite: ^13.0.0
+  appwrite: 14.0.0
 
   # State management
   flutter_bloc: ^9.0.0
@@ -49,6 +49,10 @@ dev_dependencies:
   build_runner: ^2.4.0
   drift_dev: ^2.18.0
   flutter_lints: ^6.0.0
+
+dependency_overrides:
+  flutter_web_auth_2: ^5.0.0
+  flutter_web_auth_2_platform_interface: ^5.0.0
 
 flutter:
   uses-material-design: true

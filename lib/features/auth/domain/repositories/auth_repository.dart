@@ -6,4 +6,6 @@ abstract class AuthRepository {
   Future<void> recoverPassword(String email);
   Future<void> logout();
   Future<UserEntity?> getCurrentUser();
+  Future<void> markPasswordChanged();
+  Future<bool> isPasswordChanged();
 }

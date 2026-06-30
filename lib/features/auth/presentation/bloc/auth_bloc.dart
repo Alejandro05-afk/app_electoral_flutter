@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:control_electoral/features/auth/domain/entities/user_entity.dart';
+import 'package:control_electoral/features/auth/domain/repositories/auth_repository.dart';
 import 'package:control_electoral/features/auth/domain/usecases/login_usecase.dart';
 import 'package:control_electoral/features/auth/domain/usecases/change_password_usecase.dart';
 import 'package:control_electoral/features/auth/domain/usecases/recover_password_usecase.dart';
@@ -81,11 +82,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase _loginUseCase;
   final ChangePasswordUseCase _changePasswordUseCase;
   final RecoverPasswordUseCase _recoverPasswordUseCase;
+  final AuthRepository _authRepository;
 
   AuthBloc(
     this._loginUseCase,
     this._changePasswordUseCase,
     this._recoverPasswordUseCase,
+    this._authRepository,
   ) : super(const AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<ChangePasswordRequested>(_onChangePasswordRequested);
@@ -94,6 +97,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CheckAuthStatus>(_onCheckAuthStatus);
   }
 
+  String? _savedCedula;
+
   Future<void> _onLoginRequested(
     LoginRequested event,
     Emitter<AuthState> emit,
@@ -101,8 +106,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading());
     try {
       final user = await _loginUseCase(event.cedula, event.password);
+      _savedCedula = event.cedula;
       if (user.mustChangePassword) {
-        emit(AuthMustChangePassword(user: user));
+        if (event.password != 'Ecuador2026') {
+          await _authRepository.markPasswordChanged();
+          emit(AuthAuthenticated(user: user.copyWith(mustChangePassword: false)));
+        } else {
+          emit(AuthMustChangePassword(user: user));
+        }
       } else {
         emit(AuthAuthenticated(user: user));
       }
@@ -118,12 +129,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading());
     try {
       await _changePasswordUseCase(event.oldPass, event.newPass);
-      final user = (state is AuthMustChangePassword)
-          ? (state as AuthMustChangePassword).user
-          : null;
-      if (user != null) {
-        emit(AuthAuthenticated(user: user.copyWith(mustChangePassword: false)));
-      }
+      final user = await _loginUseCase(_savedCedula!, event.newPass);
+      await _authRepository.markPasswordChanged();
+      emit(AuthAuthenticated(user: user.copyWith(mustChangePassword: false)));
     } catch (e) {
       emit(AuthError(message: _formatError(e)));
     }
@@ -148,8 +156,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     try {
-      // Logout handled by datasource
+      await _authRepository.logout();
     } catch (_) {}
+    _savedCedula = null;
     emit(const AuthUnauthenticated());
   }
 
@@ -159,7 +168,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     try {
-      emit(const AuthUnauthenticated());
+      final user = await _authRepository.getCurrentUser();
+      if (user == null) {
+        emit(const AuthUnauthenticated());
+      } else {
+        _savedCedula = user.cedula;
+        if (user.mustChangePassword) {
+          final alreadyChanged = await _authRepository.isPasswordChanged();
+          if (!alreadyChanged) {
+            emit(const AuthUnauthenticated());
+            return;
+          }
+        }
+        emit(AuthAuthenticated(user: user.copyWith(mustChangePassword: false)));
+      }
     } catch (_) {
       emit(const AuthUnauthenticated());
     }

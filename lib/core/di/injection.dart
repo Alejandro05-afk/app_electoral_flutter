@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:control_electoral/core/appwrite/appwrite_client.dart';
 import 'package:control_electoral/core/network/connectivity_service.dart';
@@ -16,6 +17,8 @@ import 'package:control_electoral/features/provincial/data/repositories/provinci
 import 'package:control_electoral/features/provincial/domain/repositories/provincial_repository.dart';
 import 'package:control_electoral/features/provincial/domain/usecases/get_recintos_usecase.dart';
 import 'package:control_electoral/features/provincial/domain/usecases/create_recinto_usecase.dart';
+import 'package:control_electoral/features/provincial/domain/usecases/get_all_mesas_usecase.dart';
+import 'package:control_electoral/features/provincial/domain/usecases/get_consolidated_votes_usecase.dart';
 import 'package:control_electoral/features/provincial/presentation/bloc/provincial_bloc.dart';
 import 'package:control_electoral/features/recinto/data/datasources/recinto_remote_datasource.dart';
 import 'package:control_electoral/features/recinto/data/repositories/recinto_repository_impl.dart';
@@ -26,7 +29,9 @@ import 'package:control_electoral/features/veedor/data/datasources/acta_remote_d
 import 'package:control_electoral/features/veedor/data/datasources/acta_local_datasource.dart';
 import 'package:control_electoral/features/veedor/data/repositories/acta_repository_impl.dart';
 import 'package:control_electoral/features/veedor/domain/repositories/acta_repository.dart';
-import 'package:control_electoral/features/veedor/domain/usecases/get_mis_actas_usecase.dart';
+import 'package:control_electoral/features/veedor/domain/usecases/get_mis_mesas_usecase.dart';
+import 'package:control_electoral/features/veedor/domain/usecases/get_actas_by_mesa_usecase.dart';
+import 'package:control_electoral/features/veedor/domain/usecases/get_organizaciones_usecase.dart';
 import 'package:control_electoral/features/veedor/domain/usecases/register_acta_usecase.dart';
 import 'package:control_electoral/features/veedor/domain/usecases/update_acta_usecase.dart';
 import 'package:control_electoral/features/veedor/presentation/bloc/mesas_bloc.dart';
@@ -37,6 +42,8 @@ final sl = GetIt.instance;
 
 Future<void> setupDependencies() async {
   AppwriteModule.register(sl);
+
+  sl.registerSingleton<ValueNotifier<int>>(ValueNotifier<int>(0));
 
   final database = AppDatabase();
   sl.registerSingleton<AppDatabase>(database);
@@ -52,20 +59,22 @@ Future<void> setupDependencies() async {
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => ChangePasswordUseCase(sl()));
   sl.registerLazySingleton(() => RecoverPasswordUseCase(sl()));
-  sl.registerFactory(() => AuthBloc(sl(), sl(), sl()));
+  sl.registerFactory(() => AuthBloc(sl(), sl(), sl(), sl()));
 
   // Provincial
   sl.registerLazySingleton<ProvincialRemoteDatasource>(
-    () => ProvincialRemoteDatasource(sl()));
+    () => ProvincialRemoteDatasource(sl(), sl()));
   sl.registerLazySingleton<ProvincialRepository>(
     () => ProvincialRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetRecintosUseCase(sl()));
   sl.registerLazySingleton(() => CreateRecintoUseCase(sl()));
-  sl.registerFactory(() => ProvincialBloc(sl(), sl()));
+  sl.registerLazySingleton(() => GetAllMesasUseCase(sl()));
+  sl.registerLazySingleton(() => GetConsolidatedVotesUseCase(sl()));
+  sl.registerFactory(() => ProvincialBloc(sl(), sl(), sl(), sl(), sl()));
 
   // Recinto
   sl.registerLazySingleton<RecintoRemoteDatasource>(
-    () => RecintoRemoteDatasource(sl()));
+    () => RecintoRemoteDatasource(sl(), sl()));
   sl.registerLazySingleton<RecintoRepository>(
     () => RecintoRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetMesasUseCase(sl()));
@@ -78,7 +87,9 @@ Future<void> setupDependencies() async {
     () => ActaLocalDatasource(sl()));
   sl.registerLazySingleton<ActaRepository>(
     () => ActaRepositoryImpl(sl(), sl(), sl()));
-  sl.registerLazySingleton(() => GetMisActasUseCase(sl()));
+  sl.registerLazySingleton(() => GetMisMesasUseCase(sl()));
+  sl.registerLazySingleton(() => GetActasByMesaUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrganizacionesUseCase(sl()));
   sl.registerLazySingleton(() => RegisterActaUseCase(sl()));
   sl.registerLazySingleton(() => UpdateActaUseCase(sl()));
   sl.registerFactory(() => MesasBloc(sl()));

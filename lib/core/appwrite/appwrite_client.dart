@@ -2,10 +2,11 @@ import 'package:appwrite/appwrite.dart';
 import 'package:get_it/get_it.dart';
 
 class AppwriteConfig {
-  static const endpoint = 'https://cloud.appwrite.io/v1';
+  static const endpoint = 'https://nyc.cloud.appwrite.io/v1';
   static const projectId = '6a3d90690027e626c87c';
   static const databaseId = '6a3d923c0002ed8f934b';
   static const actasBucketId = '6a3d9d1d003808849750';
+  static const recoveryUrl = 'https://control-electoral-password-reset.vercel.app';
 
   static const usersProfileCollection = 'users_profile';
   static const recintosCollection = 'recintos';

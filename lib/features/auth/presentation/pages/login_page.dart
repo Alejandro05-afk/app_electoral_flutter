@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:control_electoral/features/auth/presentation/bloc/auth_bloc.dart';
 
 class LoginPage extends StatefulWidget {
@@ -100,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () => context.push('/recovery'),
                       child: const Text('¿Olvidaste tu contraseña?'),
                     ),
                   ),

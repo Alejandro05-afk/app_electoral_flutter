@@ -1,0 +1,816 @@
+{
+    "organizationId": "6a17ba7d003d12698af4",
+    "projectId": "6a3d90690027e626c87c",
+    "projectName": "ControlElectoral",
+    "endpoint": "https://nyc.cloud.appwrite.io/v1",
+    "settings": {
+        "services": {
+            "account": true,
+            "avatars": true,
+            "databases": true,
+            "locale": true,
+            "health": true,
+            "storage": true,
+            "teams": true,
+            "users": true,
+            "sites": true,
+            "functions": true,
+            "graphql": true,
+            "messaging": true
+        },
+        "protocols": {
+            "rest": true,
+            "graphql": true,
+            "websocket": true
+        },
+        "auth": {
+            "methods": {
+                "jwt": true,
+                "phone": true,
+                "invites": true,
+                "anonymous": true,
+                "email-otp": true,
+                "magic-url": true,
+                "email-password": true
+            },
+            "security": {
+                "duration": 31536000,
+                "limit": null,
+                "sessionsLimit": null,
+                "passwordHistory": null,
+                "passwordDictionary": false,
+                "personalDataCheck": false,
+                "sessionAlerts": false,
+                "mockNumbers": []
+            }
+        }
+    },
+    "functions": [
+        {
+            "$id": "create-user-hierarchy",
+            "name": "Create User Hierarchy",
+            "runtime": "node-25",
+            "path": "functions/create-user-hierarchy",
+            "entrypoint": "src/main.js",
+            "execute": [
+                "any"
+            ],
+            "enabled": true,
+            "logging": true,
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "commands": "npm install",
+            "scopes": [
+                "users.read",
+                "users.write",
+                "documents.read",
+                "documents.write"
+            ],
+            "buildSpecification": "s-2vcpu-2gb",
+            "runtimeSpecification": "s-0.5vcpu-512mb",
+            "deploymentRetention": 0
+        }
+    ],
+    "tablesDB": [
+        {
+            "$id": "6a3d923c0002ed8f934b",
+            "name": "electoral_db",
+            "enabled": true
+        }
+    ],
+    "tables": [
+        {
+            "$id": "users_profile",
+            "$permissions": [
+                "create(\"label:provincial\")",
+                "read(\"label:provincial\")",
+                "update(\"label:provincial\")",
+                "delete(\"label:provincial\")",
+                "create(\"label:recinto\")",
+                "read(\"label:recinto\")",
+                "update(\"label:recinto\")",
+                "read(\"label:veedor\")"
+            ],
+            "databaseId": "6a3d923c0002ed8f934b",
+            "name": "users_profile",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "user_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "cedula",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "nombres",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "apellidos",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "telefono",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "role",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "must_change_password",
+                    "type": "boolean",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "recinto_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "created_by",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "user_id",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "user_id"
+                    ],
+                    "orders": [
+                        "asc"
+                    ]
+                },
+                {
+                    "key": "cedula",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "cedula"
+                    ],
+                    "orders": [
+                        "asc"
+                    ]
+                },
+                {
+                    "key": "role",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "role"
+                    ],
+                    "orders": [
+                        "asc"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "recintos",
+            "$permissions": [
+                "create(\"label:provincial\")",
+                "read(\"label:provincial\")",
+                "update(\"label:provincial\")",
+                "read(\"label:recinto\")"
+            ],
+            "databaseId": "6a3d923c0002ed8f934b",
+            "name": "recintos",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "canton",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "parroquia",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "nombre",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "num_jrv",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "coordinador_id",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "created_by",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "coordinador_id",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "coordinador_id"
+                    ],
+                    "orders": [
+                        "asc"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "mesas",
+            "$permissions": [
+                "create(\"label:provincial\")",
+                "read(\"label:provincial\")",
+                "update(\"label:provincial\")",
+                "create(\"label:recinto\")",
+                "read(\"label:recinto\")",
+                "update(\"label:recinto\")",
+                "read(\"label:veedor\")"
+            ],
+            "databaseId": "6a3d923c0002ed8f934b",
+            "name": "mesas",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "recinto_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "numero_mesa",
+                    "type": "integer",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "veedor_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "estado",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "recinto_id",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "recinto_id"
+                    ],
+                    "orders": [
+                        "asc"
+                    ]
+                },
+                {
+                    "key": "veedor_id",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "veedor_id"
+                    ],
+                    "orders": [
+                        "asc"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "organizaciones_politicas",
+            "$permissions": [
+                "read(\"label:provincial\")",
+                "read(\"label:recinto\")",
+                "read(\"label:veedor\")"
+            ],
+            "databaseId": "6a3d923c0002ed8f934b",
+            "name": "organizaciones_politicas",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "nombre",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 200,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "dignidad",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "numero_lista",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "candidato_nombre",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 200,
+                    "default": null,
+                    "encrypt": false
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "actas",
+            "$permissions": [
+                "create(\"label:veedor\")",
+                "read(\"label:veedor\")",
+                "update(\"label:veedor\")",
+                "create(\"label:recinto\")",
+                "read(\"label:recinto\")",
+                "update(\"label:recinto\")",
+                "create(\"label:provincial\")",
+                "read(\"label:provincial\")",
+                "update(\"label:provincial\")"
+            ],
+            "databaseId": "6a3d923c0002ed8f934b",
+            "name": "actas",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "mesa_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "recinto_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "dignidad",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 20,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "total_sufragantes_letras",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "total_sufragantes_centena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 999
+                },
+                {
+                    "key": "total_sufragantes_decena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 99
+                },
+                {
+                    "key": "total_sufragantes_unidad",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 9
+                },
+                {
+                    "key": "total_sufragantes",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "votos_blancos_letras",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "votos_blancos_centena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 999
+                },
+                {
+                    "key": "votos_blancos_decena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 99
+                },
+                {
+                    "key": "votos_blancos_unidad",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 9
+                },
+                {
+                    "key": "votos_blancos",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "votos_nulos_letras",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "votos_nulos_centena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 999
+                },
+                {
+                    "key": "votos_nulos_decena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 99
+                },
+                {
+                    "key": "votos_nulos_unidad",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 9
+                },
+                {
+                    "key": "votos_nulos",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "votos_blancos",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "foto_file_id",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "foto_bucket_id",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "gps_lat",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "gps_lng",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "gps_accuracy",
+                    "type": "double",
+                    "required": false,
+                    "array": false,
+                    "default": null,
+                    "min": -1.7976931348623157e+308,
+                    "max": 1.7976931348623157e+308
+                },
+                {
+                    "key": "registrado_por",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "sincronizado",
+                    "type": "boolean",
+                    "required": true,
+                    "array": false,
+                    "default": null
+                },
+                {
+                    "key": "updated_at",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "format": ""
+                }
+            ],
+            "indexes": []
+        },
+        {
+            "$id": "acta_votos",
+            "$permissions": [
+                "create(\"label:provincial\")",
+                "read(\"label:provincial\")",
+                "update(\"label:provincial\")",
+                "create(\"label:recinto\")",
+                "read(\"label:recinto\")",
+                "update(\"label:recinto\")",
+                "create(\"label:veedor\")",
+                "read(\"label:veedor\")",
+                "update(\"label:veedor\")"
+            ],
+            "databaseId": "6a3d923c0002ed8f934b",
+            "name": "acta_votos",
+            "enabled": true,
+            "rowSecurity": true,
+            "columns": [
+                {
+                    "key": "acta_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "organizacion_id",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "votos",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": -9223372036854775808,
+                    "max": 9223372036854775807
+                },
+                {
+                    "key": "votos_letras",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "votos_centena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 999
+                },
+                {
+                    "key": "votos_decena",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 99
+                },
+                {
+                    "key": "votos_unidad",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "default": null,
+                    "min": 0,
+                    "max": 9
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "index_1",
+                    "type": "key",
+                    "status": "available",
+                    "columns": [
+                        "acta_id",
+                        "organizacion_id"
+                    ],
+                    "orders": [
+                        "asc",
+                        "asc"
+                    ]
+                }
+            ]
+        }
+    ],
+    "buckets": [
+        {
+            "$id": "6a3d9d1d003808849750",
+            "$permissions": [
+                "create(\"label:veedor\")",
+                "read(\"label:veedor\")",
+                "create(\"label:recinto\")",
+                "read(\"label:recinto\")",
+                "update(\"label:recinto\")",
+                "delete(\"label:recinto\")",
+                "create(\"label:provincial\")",
+                "read(\"label:provincial\")",
+                "update(\"label:provincial\")",
+                "delete(\"label:provincial\")"
+            ],
+            "fileSecurity": false,
+            "name": "actas_fotos",
+            "enabled": true,
+            "maximumFileSize": 10000000,
+            "allowedFileExtensions": [
+                "jpg",
+                "png",
+                "jpeg"
+            ],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        }
+    ]
+}

@@ -31,4 +31,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity?> getCurrentUser() {
     return _datasource.getCurrentUser();
   }
+
+  @override
+  Future<void> markPasswordChanged() {
+    return _datasource.markPasswordChanged();
+  }
+
+  @override
+  Future<bool> isPasswordChanged() {
+    return _datasource.isPasswordChanged();
+  }
 }

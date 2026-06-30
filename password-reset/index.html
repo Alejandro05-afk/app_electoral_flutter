@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restablecer Contraseña - Control Electoral</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .icon {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .icon svg { width: 64px; height: 64px; }
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #1a1a2e; }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #1a1a2e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #2d2d5e; }
+    .btn:disabled { background: #999; cursor: not-allowed; }
+    .error {
+      color: #dc2626;
+      font-size: 13px;
+      margin-top: 4px;
+      display: none;
+    }
+    .alert {
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+    .alert.error { background: #fee2e2; color: #dc2626; display: block; }
+    .alert.success { background: #dcfce7; color: #16a34a; display: block; }
+    .hidden { display: none; }
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .requirements {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h1>Restablecer contraseña</h1>
+    <p class="subtitle">Ingresa tu nueva contraseña para la app Control Electoral</p>
+
+    <div id="alertBox" class="alert hidden"></div>
+
+    <form id="resetForm">
+      <div class="form-group">
+        <label for="password">Nueva contraseña</label>
+        <input type="password" id="password" placeholder="Mínimo 8 caracteres" required minlength="8">
+        <p class="requirements">Debe tener al menos 8 caracteres</p>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar contraseña</label>
+        <input type="password" id="confirmPassword" placeholder="Repite la contraseña" required minlength="8">
+      </div>
+      <button type="submit" class="btn" id="submitBtn">
+        Restablecer contraseña
+      </button>
+    </form>
+
+    <div id="successBox" class="hidden" style="text-align:center; padding: 20px 0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin-bottom:12px;">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <h2 style="font-size:20px;color:#16a34a;margin-bottom:8px;">Contraseña actualizada</h2>
+      <p style="color:#666;font-size:14px;">Ya puedes iniciar sesión con tu nueva contraseña.</p>
+      <p style="margin-top:16px;font-size:13px;color:#999;">Cierra esta ventana y vuelve a la app.</p>
+    </div>
+  </div>
+
+  <script>
+    const APPWRITE_ENDPOINT = 'https://cloud.appwrite.io/v1';
+    const APPWRITE_PROJECT_ID = '6a3d90690027e626c87c';
+
+    const form = document.getElementById('resetForm');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const submitBtn = document.getElementById('submitBtn');
+    const alertBox = document.getElementById('alertBox');
+    const successBox = document.getElementById('successBox');
+
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function showAlert(message, type) {
+      alertBox.textContent = message;
+      alertBox.className = `alert ${type}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.className = 'alert hidden';
+
+      if (password.value.length < 8) {
+        showAlert('La contraseña debe tener al menos 8 caracteres', 'error');
+        return;
+      }
+      if (password.value !== confirmPassword.value) {
+        showAlert('Las contraseñas no coinciden', 'error');
+        return;
+      }
+
+      const userId = getQueryParam('userId');
+      const secret = getQueryParam('secret');
+
+      if (!userId || !secret) {
+        showAlert('Enlace inválido o expirado. Solicita un nuevo restablecimiento desde la app.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Actualizando...';
+
+      try {
+        const response = await fetch(`${APPWRITE_ENDPOINT}/account/recovery`, {
+          method: 'PATCH',
+          headers: {
+            'X-Appwrite-Project': APPWRITE_PROJECT_ID,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId,
+            secret,
+            password: password.value,
+            passwordAgain: confirmPassword.value,
+          }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.message || 'Error al restablecer la contraseña');
+        }
+
+        form.classList.add('hidden');
+        successBox.classList.remove('hidden');
+      } catch (err) {
+        showAlert(err.message || 'Error de conexión. Intenta de nuevo.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Restablecer contraseña';
+      }
+    });
+
+    if (!getQueryParam('userId') || !getQueryParam('secret')) {
+      showAlert('Enlace inválido o expirado. Solicita un nuevo restablecimiento desde la app.', 'error');
+    }
+  </script>
+</body>
+</html>

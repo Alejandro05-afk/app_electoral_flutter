@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:control_electoral/features/veedor/domain/entities/acta_entity.dart';
-import 'package:control_electoral/features/veedor/domain/usecases/get_mis_actas_usecase.dart';
+import 'package:control_electoral/features/veedor/domain/entities/mesa_entity.dart';
+import 'package:control_electoral/features/veedor/domain/usecases/get_mis_mesas_usecase.dart';
 
 sealed class MesasEvent extends Equatable {
   const MesasEvent();
@@ -31,10 +31,10 @@ class MesasLoading extends MesasState {
 }
 
 class MesasLoaded extends MesasState {
-  final List<ActaEntity> actas;
-  const MesasLoaded({required this.actas});
+  final List<MesaEntity> mesas;
+  const MesasLoaded({required this.mesas});
   @override
-  List<Object?> get props => [actas];
+  List<Object?> get props => [mesas];
 }
 
 class MesasError extends MesasState {
@@ -45,17 +45,17 @@ class MesasError extends MesasState {
 }
 
 class MesasBloc extends Bloc<MesasEvent, MesasState> {
-  final GetMisActasUseCase _getMisActasUseCase;
+  final GetMisMesasUseCase _getMisMesasUseCase;
 
-  MesasBloc(this._getMisActasUseCase) : super(const MesasInitial()) {
+  MesasBloc(this._getMisMesasUseCase) : super(const MesasInitial()) {
     on<LoadMisMesas>(_onLoadMisMesas);
   }
 
   Future<void> _onLoadMisMesas(LoadMisMesas event, Emitter<MesasState> emit) async {
     emit(const MesasLoading());
     try {
-      final actas = await _getMisActasUseCase(event.userId);
-      emit(MesasLoaded(actas: actas));
+      final mesas = await _getMisMesasUseCase(event.userId);
+      emit(MesasLoaded(mesas: mesas));
     } catch (e) {
       emit(MesasError(message: e.toString()));
     }
